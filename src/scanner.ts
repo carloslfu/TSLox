@@ -82,7 +82,11 @@ export class Scanner {
           break
 
         default:
-          error(this.line, `Unexpected character: "${char}".`)
+          if (isDigit(char)) {
+            this.number()
+          } else {
+            error(this.line, `Unexpected character: "${char}".`)
+          }
           break
       }
     }
@@ -120,8 +124,17 @@ export class Scanner {
   }
 
   peek() {
-    if (this.isAtEnd()) return "\0"
+    if (this.isAtEnd()) {
+      return "\0"
+    }
     return this.code.charAt(this.current)
+  }
+
+  peekNext() {
+    if (this.current + 1 >= this.code.length) {
+      return "\0"
+    }
+    return this.code.charAt(this.current + 1)
   }
 
   string() {
@@ -144,4 +157,26 @@ export class Scanner {
     const value = this.code.substring(this.start + 1, this.current - 1)
     this.addToken(TokenType.STRING, value)
   }
+
+  number() {
+    while (isDigit(this.peek())) {
+      this.advance()
+    }
+
+    // Look for a fractional part.
+    if (this.peek() == "." && isDigit(this.peekNext())) {
+      // Consume the "."
+      this.advance()
+
+      while (isDigit(this.peek())) {
+        this.advance()
+      }
+    }
+
+    this.addToken(TokenType.NUMBER, Number(this.code.substring(this.start, this.current)))
+  }
+}
+
+function isDigit(char: string): boolean {
+  return char >= "0" && char <= "9"
 }
