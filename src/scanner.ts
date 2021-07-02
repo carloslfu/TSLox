@@ -93,7 +93,11 @@ export class Scanner {
       }
     }
 
-    this.tokens.push(new Token(TokenType.EOF, "", null, this.line))
+    this.tokens.push({
+      type: TokenType.EOF,
+      lexeme: "",
+      line: this.line,
+    })
 
     return this.tokens
   }
@@ -110,7 +114,7 @@ export class Scanner {
 
   addToken(type: TokenType, literal?: any) {
     const text = this.code.substring(this.start, this.current)
-    this.tokens.push(new Token(type, text, literal, this.line))
+    this.tokens.push({ type, lexeme: text, literal, line: this.line })
   }
 
   match(expected: string) {
