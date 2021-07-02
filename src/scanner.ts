@@ -84,6 +84,8 @@ export class Scanner {
         default:
           if (isDigit(char)) {
             this.number()
+          } else if (isAlpha(char)) {
+            this.identifier()
           } else {
             error(this.line, `Unexpected character: "${char}".`)
           }
@@ -175,8 +177,48 @@ export class Scanner {
 
     this.addToken(TokenType.NUMBER, Number(this.code.substring(this.start, this.current)))
   }
+
+  identifier() {
+    while (isAlphaNumeric(this.peek())) {
+      this.advance()
+    }
+
+    const text = this.code.substring(this.start, this.current)
+    let type = keywords[text]
+    if (type === undefined) {
+      type = TokenType.IDENTIFIER
+    }
+    this.addToken(type)
+  }
 }
 
 function isDigit(char: string): boolean {
   return char >= "0" && char <= "9"
+}
+
+function isAlpha(char: string) {
+  return (char >= "a" && char <= "z") || (char >= "A" && char <= "Z") || char == "_"
+}
+
+function isAlphaNumeric(char: string) {
+  return isAlpha(char) || isDigit(char)
+}
+
+const keywords: Record<string, TokenType> = {
+  and: TokenType.AND,
+  class: TokenType.CLASS,
+  else: TokenType.ELSE,
+  false: TokenType.FALSE,
+  for: TokenType.FOR,
+  fun: TokenType.FUN,
+  if: TokenType.IF,
+  nil: TokenType.NIL,
+  or: TokenType.OR,
+  print: TokenType.PRINT,
+  return: TokenType.RETURN,
+  super: TokenType.SUPER,
+  this: TokenType.THIS,
+  true: TokenType.TRUE,
+  var: TokenType.VAR,
+  while: TokenType.WHILE,
 }
