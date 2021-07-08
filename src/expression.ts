@@ -15,10 +15,10 @@ export interface Expression {
 }
 
 export interface ExpressionOperation<R> {
-  [ExpressionType.Binary]: (binaryExpression: BinaryExpression) => R
-  [ExpressionType.Grouping]: (groupingExpression: GroupingExpression) => R
-  [ExpressionType.Literal]: (literalExpression: LiteralExpression) => R
-  [ExpressionType.Unary]: (binaryExpression: UnaryExpression) => R
+  [ExpressionType.Binary]: (expression: BinaryExpression) => R
+  [ExpressionType.Grouping]: (expression: GroupingExpression) => R
+  [ExpressionType.Literal]: (expression: LiteralExpression) => R
+  [ExpressionType.Unary]: (expression: UnaryExpression) => R
 }
 
 export interface BinaryExpression extends Expression {
