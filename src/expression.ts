@@ -1,45 +1,47 @@
 import { Token } from "./token"
 import { TokenType } from "./tokenType"
 
-export enum ExpressionType {
-  Binary,
-  Grouping,
-  Literal,
-  Unary,
-}
-
 export type LiteralType = number | string | null
 
 export interface Expression {
-  type: ExpressionType
+  accept(visitor: ExpressionVisitor<any>): any
 }
 
-export interface ExpressionOperation<R> {
-  [ExpressionType.Binary]: (expression: BinaryExpression) => R
-  [ExpressionType.Grouping]: (expression: GroupingExpression) => R
-  [ExpressionType.Literal]: (expression: LiteralExpression) => R
-  [ExpressionType.Unary]: (expression: UnaryExpression) => R
+export interface ExpressionVisitor<R> {
+  visitBinaryExpression(expression: BinaryExpression): R
+  visitGroupingExpression(expression: GroupingExpression): R
+  visitLiteralExpression(expression: LiteralExpression): R
+  visitUnaryExpression(expression: UnaryExpression): R
 }
 
-export interface BinaryExpression extends Expression {
-  type: ExpressionType.Binary
-  left: Expression
-  operator: Token
-  right: Expression
+export class BinaryExpression implements Expression {
+  constructor(public left: Expression, public operator: Token, public right: Expression) {}
+
+  accept<R>(visitor: ExpressionVisitor<R>) {
+    return visitor.visitBinaryExpression(this)
+  }
 }
 
-export interface GroupingExpression extends Expression {
-  type: ExpressionType.Grouping
-  expression: Expression
+export class GroupingExpression implements Expression {
+  constructor(public expression: Expression) {}
+
+  accept<R>(visitor: ExpressionVisitor<R>) {
+    return visitor.visitGroupingExpression(this)
+  }
 }
 
-export interface LiteralExpression extends Expression {
-  type: ExpressionType.Literal
-  value: LiteralType
+export class LiteralExpression implements Expression {
+  constructor(public value: LiteralType) {}
+
+  accept<R>(visitor: ExpressionVisitor<R>) {
+    return visitor.visitLiteralExpression(this)
+  }
 }
 
-export interface UnaryExpression extends Expression {
-  type: ExpressionType.Unary
-  operator: Token
-  right: Expression
+export class UnaryExpression implements Expression {
+  constructor(public operator: Token, public right: Expression) {}
+
+  accept<R>(visitor: ExpressionVisitor<R>) {
+    return visitor.visitUnaryExpression(this)
+  }
 }

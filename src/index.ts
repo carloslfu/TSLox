@@ -1,7 +1,7 @@
 import fs from "fs"
 import inquirer from "inquirer"
-import { printAst } from "./astPrinter"
-import { BinaryExpression, ExpressionType, LiteralExpression } from "./expression"
+import { AstPrinter } from "./astPrinter"
+import { BinaryExpression, LiteralExpression } from "./expression"
 import { Scanner } from "./scanner"
 import { Token } from "./token"
 import { TokenType } from "./tokenType"
@@ -45,18 +45,15 @@ async function run(code: string) {
 
   // console.log("Tokens: ", tokens)
 
-  const codeStr = printAst({
-    type: ExpressionType.Binary,
-    left: {
-      type: ExpressionType.Literal,
-      value: "hi",
-    } as LiteralExpression,
-    operator: {} as Token,
-    right: {
-      type: ExpressionType.Literal,
-      value: "hi",
-    } as LiteralExpression,
-  } as BinaryExpression)
+  const astPrinter = new AstPrinter()
+
+  const codeStr = astPrinter.print(
+    new BinaryExpression(
+      new LiteralExpression(12),
+      new Token(TokenType.PLUS, "+", null, 1),
+      new LiteralExpression(5),
+    ),
+  )
 
   console.log(codeStr)
 }

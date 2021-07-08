@@ -1,8 +1,10 @@
 import { TokenType } from "./tokenType"
 
-export interface Token {
-  type: TokenType
-  lexeme: string
-  literal?: any
-  line: number
+export class Token {
+  constructor(
+    public type: TokenType,
+    public lexeme: string,
+    public literal: any,
+    public line: number,
+  ) {}
 }

@@ -93,11 +93,7 @@ export class Scanner {
       }
     }
 
-    this.tokens.push({
-      type: TokenType.EOF,
-      lexeme: "",
-      line: this.line,
-    })
+    this.tokens.push(new Token(TokenType.EOF, "", null, this.line))
 
     return this.tokens
   }
