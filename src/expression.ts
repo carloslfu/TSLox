@@ -40,6 +40,6 @@ export interface LiteralExpression extends Expression {
 
 export interface UnaryExpression extends Expression {
   type: ExpressionType.Unary
-  operator: TokenType
+  operator: Token
   right: Expression
 }
