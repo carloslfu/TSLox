@@ -51,7 +51,19 @@ async function run(code: string) {
     new BinaryExpression(
       new LiteralExpression(12),
       new Token(TokenType.PLUS, "+", null, 1),
-      new LiteralExpression(5),
+      new BinaryExpression(
+        new BinaryExpression(
+          new LiteralExpression(12),
+          new Token(TokenType.PLUS, "+", null, 1),
+          new BinaryExpression(
+            new LiteralExpression(12),
+            new Token(TokenType.PLUS, "+", null, 1),
+            new LiteralExpression(5),
+          ),
+        ),
+        new Token(TokenType.PLUS, "+", null, 1),
+        new LiteralExpression(5),
+      ),
     ),
   )
 
