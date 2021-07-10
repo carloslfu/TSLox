@@ -1,7 +1,7 @@
 import { Token } from "./token"
 import { TokenType } from "./tokenType"
 
-export type LiteralType = number | string | null
+export type LiteralType = number | string | boolean | null
 
 export interface Expression {
   accept(visitor: ExpressionVisitor<any>): any

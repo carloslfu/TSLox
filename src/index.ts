@@ -2,6 +2,7 @@ import fs from "fs"
 import inquirer from "inquirer"
 import { AstPrinter } from "./astPrinter"
 import { BinaryExpression, LiteralExpression } from "./expression"
+import { Parser } from "./parser"
 import { Scanner } from "./scanner"
 import { Token } from "./token"
 import { TokenType } from "./tokenType"
@@ -40,32 +41,12 @@ async function runPrompt() {
 }
 
 async function run(code: string) {
-  // const scanner = new Scanner(code)
-  // const tokens = scanner.scanTokens()
-
-  // console.log("Tokens: ", tokens)
-
+  const scanner = new Scanner(code)
+  const tokens = scanner.scanTokens()
+  const parser = new Parser(tokens)
+  const expression = parser.parse()
   const astPrinter = new AstPrinter()
+  const astStr = astPrinter.print(expression)
 
-  const codeStr = astPrinter.print(
-    new BinaryExpression(
-      new LiteralExpression(12),
-      new Token(TokenType.PLUS, "+", null, 1),
-      new BinaryExpression(
-        new BinaryExpression(
-          new LiteralExpression(12),
-          new Token(TokenType.PLUS, "+", null, 1),
-          new BinaryExpression(
-            new LiteralExpression(12),
-            new Token(TokenType.PLUS, "+", null, 1),
-            new LiteralExpression(5),
-          ),
-        ),
-        new Token(TokenType.PLUS, "+", null, 1),
-        new LiteralExpression(5),
-      ),
-    ),
-  )
-
-  console.log(codeStr)
+  console.log(astStr)
 }
