@@ -141,7 +141,7 @@ export class Scanner {
 
   string() {
     while (this.peek() != '"' && !this.isAtEnd()) {
-      if (this.peek() == "\n") {
+      if (this.peek() === "\n") {
         this.line++
       }
       this.current++
@@ -166,7 +166,7 @@ export class Scanner {
     }
 
     // Look for a fractional part.
-    if (this.peek() == "." && isDigit(this.peekNext())) {
+    if (this.peek() === "." && isDigit(this.peekNext())) {
       // Consume the "."
       this.advance()
 
@@ -197,7 +197,7 @@ function isDigit(char: string): boolean {
 }
 
 function isAlpha(char: string) {
-  return (char >= "a" && char <= "z") || (char >= "A" && char <= "Z") || char == "_"
+  return (char >= "a" && char <= "z") || (char >= "A" && char <= "Z") || char === "_"
 }
 
 function isAlphaNumeric(char: string) {

@@ -30,7 +30,7 @@ export class Parser {
       return false
     }
 
-    return this.peek().type == type
+    return this.peek().type === type
   }
 
   advance() {
@@ -42,7 +42,7 @@ export class Parser {
   }
 
   isAtEnd() {
-    return this.peek().type == TokenType.EOF
+    return this.peek().type === TokenType.EOF
   }
 
   peek() {
@@ -157,7 +157,7 @@ export class Parser {
   }
 
   error(token: Token, message: string) {
-    if (token.type == TokenType.EOF) {
+    if (token.type === TokenType.EOF) {
       error(token.line, " at end: " + message)
     } else {
       error(token.line, " at '" + token.lexeme + "': " + message)
@@ -173,7 +173,7 @@ export class Parser {
     this.advance()
 
     while (!this.isAtEnd()) {
-      if (this.previous().type == TokenType.SEMICOLON) {
+      if (this.previous().type === TokenType.SEMICOLON) {
         return
       }
 

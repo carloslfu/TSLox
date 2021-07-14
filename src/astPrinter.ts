@@ -33,7 +33,7 @@ export class AstPrinter implements ExpressionVisitor<string> {
   }
 
   visitLiteralExpression(expression: LiteralExpression) {
-    if (expression.value == null) {
+    if (expression.value === null) {
       return "nil"
     }
 

@@ -15,7 +15,7 @@ function main() {
   if (args.length > 1) {
     console.log("Usage: npm start [script]")
     process.exit(64)
-  } else if (args.length == 1) {
+  } else if (args.length === 1) {
     runFile(args[0])
   } else {
     runPrompt()
@@ -43,8 +43,10 @@ async function runPrompt() {
 async function run(code: string) {
   const scanner = new Scanner(code)
   const tokens = scanner.scanTokens()
+  console.log("tokens", tokens)
   const parser = new Parser(tokens)
   const expression = parser.parse()
+  console.log("expression", expression)
   const astPrinter = new AstPrinter()
   const astStr = astPrinter.print(expression)
 

@@ -1,7 +1,6 @@
 import { Token } from "./token"
-import { TokenType } from "./tokenType"
 
-export type LiteralType = number | string | boolean | null
+export type ValueType = number | string | boolean | null
 
 export interface Expression {
   accept(visitor: ExpressionVisitor<any>): any
@@ -31,7 +30,7 @@ export class GroupingExpression implements Expression {
 }
 
 export class LiteralExpression implements Expression {
-  constructor(public value: LiteralType) {}
+  constructor(public value: ValueType) {}
 
   accept<R>(visitor: ExpressionVisitor<R>) {
     return visitor.visitLiteralExpression(this)
