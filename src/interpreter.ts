@@ -7,11 +7,45 @@ import {
   ValueType,
   UnaryExpression,
 } from "./expression"
+import { Token } from "./token"
 import { TokenType } from "./tokenType"
 
 export class Interpreter implements ExpressionVisitor<ValueType> {
-  evaluate(expression: Expression) {
+  public hadRuntimeError = false
+
+  interpret(expression: Expression) {
+    try {
+      const value = this.evaluate(expression)
+      console.log("value:", value)
+    } catch (error) {
+      if (error instanceof RuntimeError) {
+        this.runtimeError(error)
+      }
+    }
+  }
+
+  runtimeError(error: RuntimeError) {
+    console.log(error.message + "\n[line " + error.token.line + "]")
+    this.hadRuntimeError = true
+  }
+
+  evaluate(expression: Expression): ValueType {
     return expression.accept(this)
+  }
+
+  checkNumberOperand(operator: Token, operand: ValueType) {
+    if (typeof operand === "number") {
+      return
+    }
+    throw new RuntimeError(operator, "Operand must be a number.")
+  }
+
+  checkNumberOperands(operator: Token, left: ValueType, right: ValueType) {
+    if (typeof left === "number" && typeof right === "number") {
+      return
+    }
+
+    throw new RuntimeError(operator, "Operands must be numbers.")
   }
 
   visitLiteralExpression(expression: LiteralExpression): ValueType {
@@ -24,6 +58,7 @@ export class Interpreter implements ExpressionVisitor<ValueType> {
 
   visitUnaryExpression(expression: UnaryExpression): ValueType {
     const right = this.evaluate(expression.right)
+    this.checkNumberOperand(expression.operator, right)
 
     switch (expression.operator.type) {
       case TokenType.MINUS:
@@ -54,19 +89,24 @@ export class Interpreter implements ExpressionVisitor<ValueType> {
 
     switch (expression.operator.type) {
       case TokenType.GREATER:
+        this.checkNumberOperands(expression.operator, left, right)
         return left > right
       case TokenType.GREATER_EQUAL:
+        this.checkNumberOperands(expression.operator, left, right)
         return left >= right
       case TokenType.LESS:
+        this.checkNumberOperands(expression.operator, left, right)
         return left < right
       case TokenType.LESS_EQUAL:
+        this.checkNumberOperands(expression.operator, left, right)
         return left <= right
       case TokenType.EQUAL:
         return left === right
       case TokenType.BANG_EQUAL:
         return left !== right
       case TokenType.MINUS:
-        return left - right
+        this.checkNumberOperands(expression.operator, left, right)
+        return (left as number) - (right as number)
       case TokenType.PLUS:
         if (typeof left === "number" && typeof right === "number") {
           return left + right
@@ -75,13 +115,23 @@ export class Interpreter implements ExpressionVisitor<ValueType> {
         if (typeof left === "string" && typeof right === "string") {
           return left + right
         }
+
+        throw new RuntimeError(expression.operator, "Operands must be two numbers or two strings.")
       case TokenType.SLASH:
-        return left / right
+        this.checkNumberOperands(expression.operator, left, right)
+        return (left as number) / (right as number)
       case TokenType.STAR:
-        return left * right
+        this.checkNumberOperands(expression.operator, left, right)
+        return (left as number) * (right as number)
     }
 
     // Unreachable.
     return null
+  }
+}
+
+class RuntimeError extends Error {
+  constructor(public token: Token, public message: string) {
+    super(message)
   }
 }

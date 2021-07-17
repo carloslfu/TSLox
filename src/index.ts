@@ -1,54 +1,72 @@
 import fs from "fs"
 import inquirer from "inquirer"
 import { AstPrinter } from "./astPrinter"
-import { BinaryExpression, LiteralExpression } from "./expression"
+import { Interpreter } from "./interpreter"
 import { Parser } from "./parser"
 import { Scanner } from "./scanner"
-import { Token } from "./token"
-import { TokenType } from "./tokenType"
 
-main()
+export class Lox {
+  hadError = false
 
-function main() {
-  const args = process.argv.slice(2)
+  interpreter = new Interpreter()
 
-  if (args.length > 1) {
-    console.log("Usage: npm start [script]")
-    process.exit(64)
-  } else if (args.length === 1) {
-    runFile(args[0])
-  } else {
-    runPrompt()
+  main() {
+    const args = process.argv.slice(2)
+
+    if (args.length > 1) {
+      console.log("Usage: npm start [script]")
+      process.exit(64)
+    } else if (args.length === 1) {
+      this.runFile(args[0])
+    } else {
+      this.runPrompt()
+    }
+  }
+
+  runFile(path: string) {
+    if (!fs.existsSync(path)) {
+      console.log(`The file "${path}" doesn't exist`)
+      return
+    }
+
+    const code = fs.readFileSync(path, "utf-8").toString()
+    this.run(code)
+
+    if (this.hadError) {
+      process.exit(65)
+    }
+
+    if (this.interpreter.hadRuntimeError) {
+      process.exit(70)
+    }
+  }
+
+  async runPrompt() {
+    while (true) {
+      const result: any = await inquirer.prompt({ name: "code", message: " ", prefix: ">" })
+
+      await this.run(result.code)
+    }
+  }
+
+  async run(code: string) {
+    const scanner = new Scanner(code)
+    const tokens = scanner.scanTokens()
+    console.log("tokens", tokens)
+
+    const parser = new Parser(tokens)
+    const expression = parser.parse()
+    console.log("expression", expression)
+
+    const astPrinter = new AstPrinter()
+    const astStr = astPrinter.print(expression)
+    console.log("astStr", astStr)
+
+    const result = this.interpreter.interpret(expression)
+    console.log("result", result)
   }
 }
 
-function runFile(path: string) {
-  if (!fs.existsSync(path)) {
-    console.log(`The file "${path}" doesn't exist`)
-    return
-  }
+const lox = new Lox()
 
-  const code = fs.readFileSync(path, "utf-8").toString()
-  run(code)
-}
-
-async function runPrompt() {
-  while (true) {
-    const result: any = await inquirer.prompt({ name: "code", message: " ", prefix: ">" })
-
-    await run(result.code)
-  }
-}
-
-async function run(code: string) {
-  const scanner = new Scanner(code)
-  const tokens = scanner.scanTokens()
-  console.log("tokens", tokens)
-  const parser = new Parser(tokens)
-  const expression = parser.parse()
-  console.log("expression", expression)
-  const astPrinter = new AstPrinter()
-  const astStr = astPrinter.print(expression)
-
-  console.log(astStr)
-}
+lox.main()
