@@ -7,16 +7,18 @@ import {
   ValueType,
   UnaryExpression,
 } from "./expression"
+import { ExpressionStatement, PrintStatement, Statement, StatementVisitor } from "./statement"
 import { Token } from "./token"
 import { TokenType } from "./tokenType"
 
-export class Interpreter implements ExpressionVisitor<ValueType> {
+export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisitor<void> {
   public hadRuntimeError = false
 
-  interpret(expression: Expression) {
+  interpret(statements: Statement[]) {
     try {
-      const value = this.evaluate(expression)
-      console.log("value:", value)
+      for (const statement of statements) {
+        this.execute(statement)
+      }
     } catch (error) {
       if (error instanceof RuntimeError) {
         this.runtimeError(error)
@@ -24,13 +26,17 @@ export class Interpreter implements ExpressionVisitor<ValueType> {
     }
   }
 
-  runtimeError(error: RuntimeError) {
-    console.log(error.message + "\n[line " + error.token.line + "]")
-    this.hadRuntimeError = true
+  execute(statement: Statement) {
+    statement.accept(this)
   }
 
   evaluate(expression: Expression): ValueType {
     return expression.accept(this)
+  }
+
+  runtimeError(error: RuntimeError) {
+    console.log(error.message + "\n[line " + error.token.line + "]")
+    this.hadRuntimeError = true
   }
 
   checkNumberOperand(operator: Token, operand: ValueType) {
@@ -127,6 +133,15 @@ export class Interpreter implements ExpressionVisitor<ValueType> {
 
     // Unreachable.
     return null
+  }
+
+  visitExpressionStatement(statement: ExpressionStatement) {
+    this.evaluate(statement.expression)
+  }
+
+  visitPrintStatement(statement: PrintStatement) {
+    const value = this.evaluate(statement.expression)
+    console.log(value)
   }
 }
 

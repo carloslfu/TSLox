@@ -6,6 +6,7 @@ import {
   LiteralExpression,
   UnaryExpression,
 } from "./expression"
+import { ExpressionStatement, PrintStatement, Statement } from "./statement"
 import { Token } from "./token"
 import { TokenType } from "./tokenType"
 
@@ -193,16 +194,33 @@ export class Parser {
     }
   }
 
-  parse(): Expression {
-    try {
-      return this.expression()
-    } catch (error) {
-      if (error instanceof ParseError) {
-        return null
-      }
-
-      throw error
+  statement(): Statement {
+    if (this.match(TokenType.PRINT)) {
+      return this.printStatement()
     }
+
+    return this.expressionStatement()
+  }
+
+  printStatement() {
+    const expression = this.expression()
+    this.consume(TokenType.SEMICOLON, "Expect ';' after value.")
+    return new PrintStatement(expression)
+  }
+
+  expressionStatement() {
+    const expression = this.expression()
+    this.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+    return new ExpressionStatement(expression)
+  }
+
+  parse(): Statement[] {
+    const statements: Statement[] = []
+    while (!this.isAtEnd()) {
+      statements.push(this.statement())
+    }
+
+    return statements
   }
 }
 

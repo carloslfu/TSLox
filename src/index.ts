@@ -52,18 +52,11 @@ export class Lox {
   async run(code: string) {
     const scanner = new Scanner(code)
     const tokens = scanner.scanTokens()
-    console.log("tokens", tokens)
 
     const parser = new Parser(tokens)
-    const expression = parser.parse()
-    console.log("expression", expression)
+    const statements = parser.parse()
 
-    const astPrinter = new AstPrinter()
-    const astStr = astPrinter.print(expression)
-    console.log("astStr", astStr)
-
-    const result = this.interpreter.interpret(expression)
-    console.log("result", result)
+    this.interpreter.interpret(statements)
   }
 }
 
