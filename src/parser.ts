@@ -6,7 +6,12 @@ import {
   LiteralExpression,
   UnaryExpression,
 } from "./expression"
-import { ExpressionStatement, PrintStatement, Statement } from "./statement"
+import {
+  ExpressionStatement,
+  PrintStatement,
+  Statement,
+  VariableStatement as VariableDeclarationStatement,
+} from "./statement"
 import { Token } from "./token"
 import { TokenType } from "./tokenType"
 
@@ -14,6 +19,15 @@ export class Parser {
   private current = 0
 
   constructor(public tokens: Token[]) {}
+
+  parse(): Statement[] {
+    const statements: Statement[] = []
+    while (!this.isAtEnd()) {
+      statements.push(this.statement())
+    }
+
+    return statements
+  }
 
   match(...types: TokenType[]) {
     for (const type of types) {
@@ -195,11 +209,20 @@ export class Parser {
   }
 
   statement(): Statement {
-    if (this.match(TokenType.PRINT)) {
-      return this.printStatement()
-    }
+    try {
+      if (this.match(TokenType.VAR)) {
+        return this.variableDeclaration()
+      }
+      if (this.match(TokenType.PRINT)) {
+        return this.printStatement()
+      }
 
-    return this.expressionStatement()
+      return this.expressionStatement()
+    } catch (error) {
+      if (error instanceof ParseError) {
+        this.synchronize()
+      }
+    }
   }
 
   printStatement() {
@@ -214,13 +237,16 @@ export class Parser {
     return new ExpressionStatement(expression)
   }
 
-  parse(): Statement[] {
-    const statements: Statement[] = []
-    while (!this.isAtEnd()) {
-      statements.push(this.statement())
+  variableDeclaration() {
+    const name = this.consume(TokenType.IDENTIFIER, "Expect variable name.")
+
+    let initializer: Expression = null
+    if (this.match(TokenType.EQUAL)) {
+      initializer = this.expression()
     }
 
-    return statements
+    this.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+    return new VariableDeclarationStatement(name, initializer)
   }
 }
 
