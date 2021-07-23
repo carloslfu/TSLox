@@ -1,3 +1,4 @@
+import { Environment } from "./environment"
 import {
   BinaryExpression,
   Expression,
@@ -6,13 +7,22 @@ import {
   LiteralExpression,
   ValueType,
   UnaryExpression,
+  VariableExpression,
 } from "./expression"
-import { ExpressionStatement, PrintStatement, Statement, StatementVisitor } from "./statement"
+import {
+  ExpressionStatement,
+  PrintStatement,
+  Statement,
+  StatementVisitor,
+  VariableDeclarationStatement,
+} from "./statement"
 import { Token } from "./token"
 import { TokenType } from "./tokenType"
 
 export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisitor<void> {
   public hadRuntimeError = false
+
+  environment = new Environment()
 
   interpret(statements: Statement[]) {
     try {
@@ -140,12 +150,26 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
   }
 
   visitPrintStatement(statement: PrintStatement) {
+    console.log("visitPrintStatement")
     const value = this.evaluate(statement.expression)
     console.log(value)
   }
+
+  visitVariableStatement(statement: VariableDeclarationStatement) {
+    let value = null
+    if (statement.initializer !== null) {
+      value = this.evaluate(statement.initializer)
+    }
+
+    this.environment.define(statement.name.lexeme, value)
+  }
+
+  visitVariableExpression(expression: VariableExpression): ValueType {
+    return this.environment.get(expression.name)
+  }
 }
 
-class RuntimeError extends Error {
+export class RuntimeError extends Error {
   constructor(public token: Token, public message: string) {
     super(message)
   }

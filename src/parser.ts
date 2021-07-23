@@ -5,12 +5,13 @@ import {
   GroupingExpression,
   LiteralExpression,
   UnaryExpression,
+  VariableExpression,
 } from "./expression"
 import {
   ExpressionStatement,
   PrintStatement,
   Statement,
-  VariableStatement as VariableDeclarationStatement,
+  VariableDeclarationStatement,
 } from "./statement"
 import { Token } from "./token"
 import { TokenType } from "./tokenType"
@@ -103,6 +104,7 @@ export class Parser {
 
   // term -> factor ( ( "-" | "+" ) factor )* ;
   term(): Expression {
+    console.log("term")
     let expression = this.factor()
 
     while (this.match(TokenType.MINUS, TokenType.PLUS)) {
@@ -140,6 +142,8 @@ export class Parser {
 
   // primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
   primary(): Expression {
+    console.log("primary")
+
     if (this.match(TokenType.FALSE)) {
       return new LiteralExpression(false)
     }
@@ -152,6 +156,10 @@ export class Parser {
 
     if (this.match(TokenType.NUMBER, TokenType.STRING)) {
       return new LiteralExpression(this.previous().literal)
+    }
+
+    if (this.match(TokenType.IDENTIFIER)) {
+      return new VariableExpression(this.previous())
     }
 
     if (this.match(TokenType.LEFT_PAREN)) {
@@ -226,6 +234,7 @@ export class Parser {
   }
 
   printStatement() {
+    console.log("printStatement")
     const expression = this.expression()
     this.consume(TokenType.SEMICOLON, "Expect ';' after value.")
     return new PrintStatement(expression)

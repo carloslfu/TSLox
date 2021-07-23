@@ -8,7 +8,7 @@ export interface Statement {
 export interface StatementVisitor<R> {
   visitExpressionStatement(statement: ExpressionStatement): R
   visitPrintStatement(statement: PrintStatement): R
-  visitVariableStatement(statement: VariableStatement): R
+  visitVariableStatement(statement: VariableDeclarationStatement): R
 }
 
 export class ExpressionStatement implements Statement {
@@ -27,7 +27,7 @@ export class PrintStatement implements Statement {
   }
 }
 
-export class VariableStatement implements Statement {
+export class VariableDeclarationStatement implements Statement {
   constructor(public name: Token, public initializer: Expression) {}
 
   accept<R>(visitor: StatementVisitor<R>) {

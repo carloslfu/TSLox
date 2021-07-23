@@ -4,6 +4,7 @@ import { AstPrinter } from "./astPrinter"
 import { Interpreter } from "./interpreter"
 import { Parser } from "./parser"
 import { Scanner } from "./scanner"
+import { VariableDeclarationStatement } from "./statement"
 
 export class Lox {
   hadError = false
@@ -55,6 +56,8 @@ export class Lox {
 
     const parser = new Parser(tokens)
     const statements = parser.parse()
+
+    // console.log(JSON.stringify(tokens, null, 2))
 
     this.interpreter.interpret(statements)
   }

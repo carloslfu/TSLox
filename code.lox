@@ -2,3 +2,6 @@ print 1 + 2 * 10 / 4 + 45;
 print "one";
 print true;
 print 2 + 1;
+var a = 15;
+var b = 20;
+print a + b;
