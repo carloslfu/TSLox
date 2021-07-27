@@ -59,7 +59,9 @@ export class Lox {
 
     // console.log(JSON.stringify(tokens, null, 2))
 
+    this.interpreter.isREPL = true
     this.interpreter.interpret(statements)
+    this.interpreter.isREPL = false
   }
 }
 

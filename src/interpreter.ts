@@ -24,6 +24,8 @@ import { TokenType } from "./tokenType"
 export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisitor<void> {
   public hadRuntimeError = false
 
+  public isREPL = false
+
   environment = new Environment()
 
   interpret(statements: Statement[]) {
@@ -148,7 +150,11 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
   }
 
   visitExpressionStatement(statement: ExpressionStatement) {
-    this.evaluate(statement.expression)
+    const value = this.evaluate(statement.expression)
+
+    if (this.isREPL) {
+      console.log(value)
+    }
   }
 
   visitPrintStatement(statement: PrintStatement) {
