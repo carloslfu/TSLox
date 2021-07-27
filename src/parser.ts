@@ -8,6 +8,7 @@ import {
   VariableExpression,
 } from "./expression"
 import {
+  AssignmentStatement,
   ExpressionStatement,
   PrintStatement,
   Statement,
@@ -104,7 +105,6 @@ export class Parser {
 
   // term -> factor ( ( "-" | "+" ) factor )* ;
   term(): Expression {
-    console.log("term")
     let expression = this.factor()
 
     while (this.match(TokenType.MINUS, TokenType.PLUS)) {
@@ -142,8 +142,6 @@ export class Parser {
 
   // primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
   primary(): Expression {
-    console.log("primary")
-
     if (this.match(TokenType.FALSE)) {
       return new LiteralExpression(false)
     }
@@ -216,16 +214,18 @@ export class Parser {
     }
   }
 
+  // statement -> variableDeclaration | printStatement | expressionStatement
   statement(): Statement {
     try {
       if (this.match(TokenType.VAR)) {
         return this.variableDeclaration()
       }
+
       if (this.match(TokenType.PRINT)) {
         return this.printStatement()
       }
 
-      return this.expressionStatement()
+      return this.expressionAndAssignmentStatement()
     } catch (error) {
       if (error instanceof ParseError) {
         this.synchronize()
@@ -234,14 +234,28 @@ export class Parser {
   }
 
   printStatement() {
-    console.log("printStatement")
     const expression = this.expression()
     this.consume(TokenType.SEMICOLON, "Expect ';' after value.")
     return new PrintStatement(expression)
   }
 
-  expressionStatement() {
+  expressionAndAssignmentStatement() {
     const expression = this.expression()
+
+    if (this.match(TokenType.EQUAL)) {
+      if (expression instanceof VariableExpression) {
+        const value = this.expression()
+        const name = expression.name
+
+        this.consume(TokenType.SEMICOLON, "Expect ';' after assignment.")
+        return new AssignmentStatement(name, value)
+      }
+
+      const target = this.previous()
+      this.parseError(target, "Invalid assignment target.")
+      return
+    }
+
     this.consume(TokenType.SEMICOLON, "Expect ';' after expression.")
     return new ExpressionStatement(expression)
   }

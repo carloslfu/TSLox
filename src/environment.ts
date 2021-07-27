@@ -16,4 +16,13 @@ export class Environment {
 
     throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.")
   }
+
+  assign(name: Token, value: ValueType) {
+    if (name.lexeme in this.values) {
+      this.values[name.lexeme] = value
+      return
+    }
+
+    throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.")
+  }
 }

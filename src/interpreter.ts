@@ -10,6 +10,7 @@ import {
   VariableExpression,
 } from "./expression"
 import {
+  AssignmentStatement,
   ExpressionStatement,
   PrintStatement,
   Statement,
@@ -150,7 +151,6 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
   }
 
   visitPrintStatement(statement: PrintStatement) {
-    console.log("visitPrintStatement")
     const value = this.evaluate(statement.expression)
     console.log(value)
   }
@@ -162,6 +162,11 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
     }
 
     this.environment.define(statement.name.lexeme, value)
+  }
+
+  visitAssignmentStatement(statement: AssignmentStatement) {
+    const value = this.evaluate(statement.value)
+    this.environment.assign(statement.name, value)
   }
 
   visitVariableExpression(expression: VariableExpression): ValueType {
