@@ -11,6 +11,7 @@ import {
 } from "./expression"
 import {
   AssignmentStatement,
+  BlockStatement,
   ExpressionStatement,
   PrintStatement,
   Statement,
@@ -171,6 +172,23 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
 
   visitVariableExpression(expression: VariableExpression): ValueType {
     return this.environment.get(expression.name)
+  }
+
+  visitBlockStatement(statement: BlockStatement) {
+    this.executeBlock(statement.statements, new Environment(this.environment))
+  }
+
+  executeBlock(statements: Statement[], environment: Environment) {
+    const previous = this.environment
+    try {
+      this.environment = environment
+
+      for (const statement of statements) {
+        this.execute(statement)
+      }
+    } finally {
+      this.environment = previous
+    }
   }
 }
 

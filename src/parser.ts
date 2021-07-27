@@ -9,6 +9,7 @@ import {
 } from "./expression"
 import {
   AssignmentStatement,
+  BlockStatement,
   ExpressionStatement,
   PrintStatement,
   Statement,
@@ -225,6 +226,10 @@ export class Parser {
         return this.printStatement()
       }
 
+      if (this.match(TokenType.LEFT_BRACE)) {
+        return new BlockStatement(this.blockStatement())
+      }
+
       return this.expressionAndAssignmentStatement()
     } catch (error) {
       if (error instanceof ParseError) {
@@ -270,6 +275,17 @@ export class Parser {
 
     this.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
     return new VariableDeclarationStatement(name, initializer)
+  }
+
+  blockStatement() {
+    const statements: Statement[] = []
+
+    while (!this.check(TokenType.RIGHT_BRACE) && !this.isAtEnd()) {
+      statements.push(this.statement())
+    }
+
+    this.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+    return statements
   }
 }
 

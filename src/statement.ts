@@ -10,6 +10,7 @@ export interface StatementVisitor<R> {
   visitPrintStatement(statement: PrintStatement): R
   visitVariableStatement(statement: VariableDeclarationStatement): R
   visitAssignmentStatement(statement: AssignmentStatement): R
+  visitBlockStatement(statement: BlockStatement): R
 }
 
 export class ExpressionStatement implements Statement {
@@ -41,5 +42,13 @@ export class AssignmentStatement implements Statement {
 
   accept<R>(visitor: StatementVisitor<R>) {
     return visitor.visitAssignmentStatement(this)
+  }
+}
+
+export class BlockStatement implements Statement {
+  constructor(public statements: Statement[]) {}
+
+  accept<R>(visitor: StatementVisitor<R>) {
+    return visitor.visitBlockStatement(this)
   }
 }
