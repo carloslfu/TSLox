@@ -1,19 +1,10 @@
-var a = "global a";
-var b = "global b";
-var c = "global c";
-{
-  var a = "outer a";
-  var b = "outer b";
-  {
-    var a = "inner a";
-    print a;
-    print b;
-    print c;
+var count = 1;
+
+while (count <= 10) {
+  if (count == 5) {
+    print "This is five!";
+  } else {
+    print count;
   }
-  print a;
-  print b;
-  print c;
+  count = count + 1;
 }
-print a;
-print b;
-print c;
