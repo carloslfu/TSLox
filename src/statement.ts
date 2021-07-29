@@ -11,6 +11,8 @@ export interface StatementVisitor<R> {
   visitVariableStatement(statement: VariableDeclarationStatement): R
   visitAssignmentStatement(statement: AssignmentStatement): R
   visitBlockStatement(statement: BlockStatement): R
+  visitIfStatement(statement: IfStatement): R
+  visitWhileStatement(statement: WhileStatement): R
 }
 
 export class ExpressionStatement implements Statement {
@@ -50,5 +52,25 @@ export class BlockStatement implements Statement {
 
   accept<R>(visitor: StatementVisitor<R>) {
     return visitor.visitBlockStatement(this)
+  }
+}
+
+export class IfStatement implements Statement {
+  constructor(
+    public condition: Expression,
+    public thenBranch: Statement,
+    public elseBranch: Statement,
+  ) {}
+
+  accept<R>(visitor: StatementVisitor<R>) {
+    return visitor.visitIfStatement(this)
+  }
+}
+
+export class WhileStatement implements Statement {
+  constructor(public condition: Expression, public body: Statement) {}
+
+  accept<R>(visitor: StatementVisitor<R>) {
+    return visitor.visitWhileStatement(this)
   }
 }

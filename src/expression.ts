@@ -12,6 +12,7 @@ export interface ExpressionVisitor<R> {
   visitLiteralExpression(expression: LiteralExpression): R
   visitUnaryExpression(expression: UnaryExpression): R
   visitVariableExpression(expression: VariableExpression): R
+  visitLogicalExpression(expression: LogicalExpression): R
 }
 
 export class BinaryExpression implements Expression {
@@ -51,5 +52,13 @@ export class VariableExpression implements Expression {
 
   accept<R>(visitor: ExpressionVisitor<R>) {
     return visitor.visitVariableExpression(this)
+  }
+}
+
+export class LogicalExpression implements Expression {
+  constructor(public left: Expression, public operator: Token, public right: Expression) {}
+
+  accept<R>(visitor: ExpressionVisitor<R>) {
+    return visitor.visitLogicalExpression(this)
   }
 }

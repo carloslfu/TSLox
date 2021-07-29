@@ -8,15 +8,18 @@ import {
   ValueType,
   UnaryExpression,
   VariableExpression,
+  LogicalExpression,
 } from "./expression"
 import {
   AssignmentStatement,
   BlockStatement,
   ExpressionStatement,
+  IfStatement,
   PrintStatement,
   Statement,
   StatementVisitor,
   VariableDeclarationStatement,
+  WhileStatement,
 } from "./statement"
 import { Token } from "./token"
 import { TokenType } from "./tokenType"
@@ -70,6 +73,22 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
 
   visitLiteralExpression(expression: LiteralExpression): ValueType {
     return expression.value
+  }
+
+  visitLogicalExpression(expression: LogicalExpression): ValueType {
+    const left = this.evaluate(expression.left)
+
+    if (expression.operator.type == TokenType.OR) {
+      if (this.isTruthy(left)) {
+        return left
+      }
+    } else {
+      if (!this.isTruthy(left)) {
+        return left
+      }
+    }
+
+    return this.evaluate(expression.right)
   }
 
   visitGroupingExpression(expression: GroupingExpression): ValueType {
@@ -194,6 +213,20 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
       }
     } finally {
       this.environment = previous
+    }
+  }
+
+  visitIfStatement(statement: IfStatement) {
+    if (this.isTruthy(this.evaluate(statement.condition))) {
+      this.execute(statement.thenBranch)
+    } else if (statement.elseBranch != null) {
+      this.execute(statement.elseBranch)
+    }
+  }
+
+  visitWhileStatement(statement: WhileStatement) {
+    while (this.isTruthy(this.evaluate(statement.condition))) {
+      this.execute(statement.body)
     }
   }
 }

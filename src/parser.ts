@@ -4,6 +4,7 @@ import {
   Expression,
   GroupingExpression,
   LiteralExpression,
+  LogicalExpression,
   UnaryExpression,
   VariableExpression,
 } from "./expression"
@@ -11,9 +12,11 @@ import {
   AssignmentStatement,
   BlockStatement,
   ExpressionStatement,
+  IfStatement,
   PrintStatement,
   Statement,
   VariableDeclarationStatement,
+  WhileStatement,
 } from "./statement"
 import { Token } from "./token"
 import { TokenType } from "./tokenType"
@@ -73,7 +76,31 @@ export class Parser {
 
   // expression -> equality ;
   expression(): Expression {
-    return this.equality()
+    return this.or()
+  }
+
+  or() {
+    let expression = this.and()
+
+    while (this.match(TokenType.OR)) {
+      const operator = this.previous()
+      const right = this.and()
+      expression = new LogicalExpression(expression, operator, right)
+    }
+
+    return expression
+  }
+
+  and() {
+    let expression = this.equality()
+
+    while (this.match(TokenType.AND)) {
+      const operator = this.previous()
+      const right = this.equality()
+      expression = new LogicalExpression(expression, operator, right)
+    }
+
+    return expression
   }
 
   // equality -> comparison ( ( "!=" | "==" ) comparison )* ;
@@ -222,8 +249,16 @@ export class Parser {
         return this.variableDeclaration()
       }
 
+      if (this.match(TokenType.IF)) {
+        return this.ifStatement()
+      }
+
       if (this.match(TokenType.PRINT)) {
         return this.printStatement()
+      }
+
+      if (this.match(TokenType.WHILE)) {
+        return this.whileStatement()
       }
 
       if (this.match(TokenType.LEFT_BRACE)) {
@@ -286,6 +321,29 @@ export class Parser {
 
     this.consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
     return statements
+  }
+
+  ifStatement() {
+    this.consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
+    const condition = this.expression()
+    this.consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.")
+
+    const thenBranch = this.statement()
+    let elseBranch: Statement = null
+    if (this.match(TokenType.ELSE)) {
+      elseBranch = this.statement()
+    }
+
+    return new IfStatement(condition, thenBranch, elseBranch)
+  }
+
+  whileStatement() {
+    this.consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
+    const condition = this.expression()
+    this.consume(TokenType.RIGHT_PAREN, "Expect ')' after condition.")
+    const body = this.statement()
+
+    return new WhileStatement(condition, body)
   }
 }
 
