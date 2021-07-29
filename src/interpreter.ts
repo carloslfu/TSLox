@@ -139,7 +139,7 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
       case TokenType.LESS_EQUAL:
         this.checkNumberOperands(expression.operator, left, right)
         return left <= right
-      case TokenType.EQUAL:
+      case TokenType.EQUAL_EQUAL:
         return left === right
       case TokenType.BANG_EQUAL:
         return left !== right
