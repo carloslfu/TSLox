@@ -46,7 +46,9 @@ export class Lox {
     while (true) {
       const result: any = await inquirer.prompt({ name: "code", message: " ", prefix: ">" })
 
+      this.interpreter.isREPL = true
       await this.run(result.code)
+      this.interpreter.isREPL = false
     }
   }
 
@@ -57,11 +59,7 @@ export class Lox {
     const parser = new Parser(tokens)
     const statements = parser.parse()
 
-    // console.log(JSON.stringify(tokens, null, 2))
-
-    this.interpreter.isREPL = true
     this.interpreter.interpret(statements)
-    this.interpreter.isREPL = false
   }
 }
 

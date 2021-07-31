@@ -11,11 +11,12 @@ import {
   LogicalExpression,
   FunctionCallExpression,
 } from "./expression"
-import { LoxFunction } from "./LoxFunction"
+import { createLoxDefinedFunction, LoxFunction } from "./LoxFunction"
 import {
   AssignmentStatement,
   BlockStatement,
   ExpressionStatement,
+  FunctionDeclarationStatement,
   IfStatement,
   PrintStatement,
   Statement,
@@ -205,6 +206,11 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
     }
 
     return (callee as LoxFunction).call(this, args)
+  }
+
+  visitFunctionStatement(statement: FunctionDeclarationStatement) {
+    const fun = createLoxDefinedFunction(statement)
+    this.environment.define(statement.name.lexeme, fun)
   }
 
   visitExpressionStatement(statement: ExpressionStatement) {

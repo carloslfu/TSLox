@@ -1,10 +1,32 @@
-var count = 1;
+fun rangeCustom(min, max) {
+  var count = min;
 
-while (count <= 10) {
-  if (count == 5) {
-    print "This is five!";
-  } else {
-    print count;
+  while (count <= max) {
+    if (count == 5) {
+      print "This is five!";
+    } else {
+      print count;
+    }
+    count = count + 1;
   }
-  count = count + 1;
 }
+
+rangeCustom(5, 20);
+print "----";
+rangeCustom(6, 10);
+print "----";
+
+fun repeat(times, fn) {
+  var count = 1;
+
+  while (count <= times) {
+    fn(count);
+    count = count + 1;
+  }
+}
+
+fun printFn(num) {
+  print num;
+}
+
+repeat(5, printFn);
