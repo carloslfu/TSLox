@@ -14,6 +14,7 @@ export interface StatementVisitor<R> {
   visitIfStatement(statement: IfStatement): R
   visitWhileStatement(statement: WhileStatement): R
   visitFunctionStatement(statement: FunctionDeclarationStatement): R
+  visitReturnStatement(statement: ReturnStatement): R
 }
 
 export class ExpressionStatement implements Statement {
@@ -81,5 +82,13 @@ export class FunctionDeclarationStatement implements Statement {
 
   accept<R>(visitor: StatementVisitor<R>) {
     return visitor.visitFunctionStatement(this)
+  }
+}
+
+export class ReturnStatement implements Statement {
+  constructor(public keyword: Token, public value: Expression) {}
+
+  accept<R>(visitor: StatementVisitor<R>) {
+    return visitor.visitReturnStatement(this)
   }
 }

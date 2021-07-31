@@ -1,4 +1,4 @@
-import { LoxFunction } from "./LoxFunction"
+import { LoxFunction } from "./loxFunction"
 import { Token } from "./token"
 
 export type ValueType = number | string | boolean | null | LoxFunction

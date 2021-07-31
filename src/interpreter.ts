@@ -11,7 +11,7 @@ import {
   LogicalExpression,
   FunctionCallExpression,
 } from "./expression"
-import { createLoxDefinedFunction, LoxFunction } from "./LoxFunction"
+import { createLoxDefinedFunction, LoxFunction } from "./loxFunction"
 import {
   AssignmentStatement,
   BlockStatement,
@@ -19,6 +19,7 @@ import {
   FunctionDeclarationStatement,
   IfStatement,
   PrintStatement,
+  ReturnStatement,
   Statement,
   StatementVisitor,
   VariableDeclarationStatement,
@@ -209,7 +210,7 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
   }
 
   visitFunctionStatement(statement: FunctionDeclarationStatement) {
-    const fun = createLoxDefinedFunction(statement)
+    const fun = createLoxDefinedFunction(statement, this.environment)
     this.environment.define(statement.name.lexeme, fun)
   }
 
@@ -224,6 +225,15 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
   visitPrintStatement(statement: PrintStatement) {
     const value = this.evaluate(statement.expression)
     console.log(value)
+  }
+
+  visitReturnStatement(statement: ReturnStatement) {
+    let value: ValueType = null
+    if (statement.value != null) {
+      value = this.evaluate(statement.value)
+    }
+
+    throw new Return(value)
   }
 
   visitVariableStatement(statement: VariableDeclarationStatement) {
@@ -279,5 +289,11 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
 export class RuntimeError extends Error {
   constructor(public token: Token, public message: string) {
     super(message)
+  }
+}
+
+export class Return extends Error {
+  constructor(public value: ValueType) {
+    super(null)
   }
 }

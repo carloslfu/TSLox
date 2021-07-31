@@ -7,6 +7,7 @@ import {
   LiteralExpression,
   LogicalExpression,
   UnaryExpression,
+  ValueType,
   VariableExpression,
 } from "./expression"
 import {
@@ -16,6 +17,7 @@ import {
   FunctionDeclarationStatement,
   IfStatement,
   PrintStatement,
+  ReturnStatement,
   Statement,
   VariableDeclarationStatement,
   WhileStatement,
@@ -290,6 +292,10 @@ export class Parser {
         return this.printStatement()
       }
 
+      if (this.match(TokenType.RETURN)) {
+        return this.returnStatement()
+      }
+
       if (this.match(TokenType.WHILE)) {
         return this.whileStatement()
       }
@@ -310,6 +316,17 @@ export class Parser {
     const expression = this.expression()
     this.consume(TokenType.SEMICOLON, "Expect ';' after value.")
     return new PrintStatement(expression)
+  }
+
+  returnStatement() {
+    const keyword = this.previous()
+    let value: Expression = null
+    if (!this.check(TokenType.SEMICOLON)) {
+      value = this.expression()
+    }
+
+    this.consume(TokenType.SEMICOLON, "Expect ';' after return value.")
+    return new ReturnStatement(keyword, value)
   }
 
   expressionAndAssignmentStatement() {
