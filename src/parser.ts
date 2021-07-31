@@ -2,6 +2,7 @@ import { error } from "./error"
 import {
   BinaryExpression,
   Expression,
+  FunctionCallExpression,
   GroupingExpression,
   LiteralExpression,
   LogicalExpression,
@@ -12,6 +13,7 @@ import {
   AssignmentStatement,
   BlockStatement,
   ExpressionStatement,
+  FunctionDeclarationStatement,
   IfStatement,
   PrintStatement,
   Statement,
@@ -165,7 +167,34 @@ export class Parser {
       return new UnaryExpression(operator, right)
     }
 
-    return this.primary()
+    return this.functionCall()
+  }
+
+  functionCall(): Expression {
+    let expression = this.primary()
+
+    while (true) {
+      if (this.match(TokenType.LEFT_PAREN)) {
+        expression = this.finishFunctionCall(expression)
+      } else {
+        break
+      }
+    }
+
+    return expression
+  }
+
+  finishFunctionCall(callee: Expression): Expression {
+    const args = []
+    if (!this.check(TokenType.RIGHT_PAREN)) {
+      do {
+        args.push(this.expression())
+      } while (this.match(TokenType.COMMA))
+    }
+
+    const paren = this.consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.")
+
+    return new FunctionCallExpression(callee, paren, args)
   }
 
   // primary -> NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" ;
@@ -249,6 +278,10 @@ export class Parser {
         return this.variableDeclaration()
       }
 
+      if (this.match(TokenType.FUN)) {
+        return this.functionDeclaration("function")
+      }
+
       if (this.match(TokenType.IF)) {
         return this.ifStatement()
       }
@@ -310,6 +343,23 @@ export class Parser {
 
     this.consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
     return new VariableDeclarationStatement(name, initializer)
+  }
+
+  functionDeclaration(kind: string) {
+    const name = this.consume(TokenType.IDENTIFIER, "Expect " + kind + " name.")
+
+    this.consume(TokenType.LEFT_PAREN, "Expect '(' after " + kind + " name.")
+    const parameters: Token[] = []
+    if (!this.check(TokenType.RIGHT_PAREN)) {
+      do {
+        parameters.push(this.consume(TokenType.IDENTIFIER, "Expect parameter name."))
+      } while (this.match(TokenType.COMMA))
+    }
+    this.consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+
+    this.consume(TokenType.LEFT_BRACE, "Expect '{' before " + kind + " body.")
+    const body = this.blockStatement()
+    return new FunctionDeclarationStatement(name, parameters, body)
   }
 
   blockStatement() {

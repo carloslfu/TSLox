@@ -1,6 +1,7 @@
+import { LoxFunction } from "./LoxFunction"
 import { Token } from "./token"
 
-export type ValueType = number | string | boolean | null
+export type ValueType = number | string | boolean | null | LoxFunction
 
 export interface Expression {
   accept(visitor: ExpressionVisitor<any>): any
@@ -13,6 +14,7 @@ export interface ExpressionVisitor<R> {
   visitUnaryExpression(expression: UnaryExpression): R
   visitVariableExpression(expression: VariableExpression): R
   visitLogicalExpression(expression: LogicalExpression): R
+  visitFunctionCallExpression(expression: FunctionCallExpression): R
 }
 
 export class BinaryExpression implements Expression {
@@ -60,5 +62,13 @@ export class LogicalExpression implements Expression {
 
   accept<R>(visitor: ExpressionVisitor<R>) {
     return visitor.visitLogicalExpression(this)
+  }
+}
+
+export class FunctionCallExpression implements Expression {
+  constructor(public callee: Expression, public paren: Token, public args: Expression[]) {}
+
+  accept<R>(visitor: ExpressionVisitor<R>) {
+    return visitor.visitFunctionCallExpression(this)
   }
 }

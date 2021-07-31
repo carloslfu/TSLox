@@ -9,7 +9,9 @@ import {
   UnaryExpression,
   VariableExpression,
   LogicalExpression,
+  FunctionCallExpression,
 } from "./expression"
+import { LoxFunction } from "./LoxFunction"
 import {
   AssignmentStatement,
   BlockStatement,
@@ -29,7 +31,22 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
 
   public isREPL = false
 
-  environment = new Environment()
+  globals = new Environment()
+
+  environment = this.globals
+
+  constructor() {
+    this.globals.define(
+      "clock",
+      new LoxFunction(
+        () => 0,
+        () => Date.now(),
+        () => {
+          return "<native fn>"
+        },
+      ),
+    )
+  }
 
   interpret(statements: Statement[]) {
     try {
@@ -166,6 +183,28 @@ export class Interpreter implements ExpressionVisitor<ValueType>, StatementVisit
 
     // Unreachable.
     return null
+  }
+
+  visitFunctionCallExpression(expression: FunctionCallExpression) {
+    const callee = this.evaluate(expression.callee)
+
+    const args: ValueType[] = []
+    for (const arg of expression.args) {
+      args.push(this.evaluate(arg))
+    }
+
+    if (!(callee instanceof LoxFunction)) {
+      throw new RuntimeError(expression.paren, "Can only call functions and classes.")
+    }
+
+    if (args.length != callee.arity()) {
+      throw new RuntimeError(
+        expression.paren,
+        "Expected " + callee.arity() + " arguments but got " + args.length + ".",
+      )
+    }
+
+    return (callee as LoxFunction).call(this, args)
   }
 
   visitExpressionStatement(statement: ExpressionStatement) {

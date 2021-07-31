@@ -13,6 +13,7 @@ export interface StatementVisitor<R> {
   visitBlockStatement(statement: BlockStatement): R
   visitIfStatement(statement: IfStatement): R
   visitWhileStatement(statement: WhileStatement): R
+  visitFunctionStatement(statement: FunctionDeclarationStatement): R
 }
 
 export class ExpressionStatement implements Statement {
@@ -72,5 +73,13 @@ export class WhileStatement implements Statement {
 
   accept<R>(visitor: StatementVisitor<R>) {
     return visitor.visitWhileStatement(this)
+  }
+}
+
+export class FunctionDeclarationStatement implements Statement {
+  constructor(public name: Token, public params: Token[], public body: Statement[]) {}
+
+  accept<R>(visitor: StatementVisitor<R>) {
+    return visitor.visitFunctionStatement(this)
   }
 }
